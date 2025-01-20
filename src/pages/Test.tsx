@@ -5,6 +5,15 @@ import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 
 interface Question {
   id: number;
@@ -88,7 +97,9 @@ const TestPage = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [showSignUpDialog, setShowSignUpDialog] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAnswer = (value: string) => {
     const newAnswers = [...answers];
@@ -109,8 +120,16 @@ const TestPage = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      setShowResults(true);
+      setShowSignUpDialog(true);
     }
+  };
+
+  const handleSignUp = () => {
+    // Store test results in localStorage before redirecting
+    const score = calculateScore();
+    const level = determineLevel(score);
+    localStorage.setItem('testResults', JSON.stringify({ score, level }));
+    navigate('/courses'); // Redirect to courses page where sign up form will be shown
   };
 
   const calculateScore = () => {
@@ -160,7 +179,7 @@ const TestPage = () => {
                 {getRecommendation(level)}
               </p>
               <Button
-                onClick={() => window.location.href = '/courses'}
+                onClick={() => navigate('/courses')}
                 className="mt-6"
               >
                 View Recommended Courses
@@ -177,52 +196,74 @@ const TestPage = () => {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
-    <div className="container max-w-4xl mx-auto py-12 px-4">
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-sm text-muted-foreground">
-            Question {currentQuestion + 1} of {questions.length}
-          </p>
-          <span className="text-sm font-medium">{currentQ.level}</span>
+    <>
+      <div className="container max-w-4xl mx-auto py-12 px-4">
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm text-muted-foreground">
+              Question {currentQuestion + 1} of {questions.length}
+            </p>
+            <span className="text-sm font-medium">{currentQ.level}</span>
+          </div>
+          <Progress value={progress} className="w-full h-2" />
         </div>
-        <Progress value={progress} className="w-full h-2" />
+
+        <Card className="p-8 glass-card fade-in">
+          <h2 className="text-2xl font-semibold mb-6">{currentQ.question}</h2>
+          
+          <RadioGroup
+            onValueChange={handleAnswer}
+            value={answers[currentQuestion]?.toString()}
+            className="space-y-4"
+          >
+            {currentQ.options.map((option, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                <label
+                  htmlFor={`option-${index}`}
+                  className="text-lg leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {option}
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+
+          <div className="mt-8 flex justify-end">
+            <Button onClick={handleNext} size="lg">
+              {currentQuestion < questions.length - 1 ? (
+                <>
+                  Next Question
+                  <ArrowRight className="ml-2" />
+                </>
+              ) : (
+                "Submit Test"
+              )}
+            </Button>
+          </div>
+        </Card>
       </div>
 
-      <Card className="p-8 glass-card fade-in">
-        <h2 className="text-2xl font-semibold mb-6">{currentQ.question}</h2>
-        
-        <RadioGroup
-          onValueChange={handleAnswer}
-          value={answers[currentQuestion]?.toString()}
-          className="space-y-4"
-        >
-          {currentQ.options.map((option, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-              <label
-                htmlFor={`option-${index}`}
-                className="text-lg leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {option}
-              </label>
-            </div>
-          ))}
-        </RadioGroup>
-
-        <div className="mt-8 flex justify-end">
-          <Button onClick={handleNext} size="lg">
-            {currentQuestion < questions.length - 1 ? (
-              <>
-                Next Question
-                <ArrowRight className="ml-2" />
-              </>
-            ) : (
-              "Submit Test"
-            )}
-          </Button>
-        </div>
-      </Card>
-    </div>
+      <Dialog open={showSignUpDialog} onOpenChange={setShowSignUpDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign Up to View Your Results</DialogTitle>
+            <DialogDescription>
+              Create an account to see your test results and get personalized course recommendations based on your proficiency level.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSignUpDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSignUp}>
+              Sign Up Now
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
