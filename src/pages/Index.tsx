@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, BookOpen, Users, Award } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   const features = [
     {
       icon: <BookOpen className="h-6 w-6" />,
@@ -53,7 +56,7 @@ const Index = () => {
             Start your journey to fluency today.
           </p>
           <div className="space-x-4 fade-in">
-            <Button size="lg" className="hover-lift">
+            <Button size="lg" className="hover-lift" onClick={() => navigate('/auth')}>
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -113,7 +116,7 @@ const Index = () => {
           <p className="text-lg md:text-xl mb-8 opacity-90">
             Join our academy today and take the first step towards English fluency.
           </p>
-          <Button size="lg" variant="secondary" className="hover-lift">
+          <Button size="lg" variant="secondary" className="hover-lift" onClick={() => navigate('/auth')}>
             Enroll Now
           </Button>
         </div>
