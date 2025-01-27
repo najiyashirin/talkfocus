@@ -60,7 +60,7 @@ const Index = () => {
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="hover-lift">
+            <Button size="lg" variant="outline" className="hover-lift" onClick={() => navigate('/test')}>
               Take Free Test
             </Button>
           </div>
